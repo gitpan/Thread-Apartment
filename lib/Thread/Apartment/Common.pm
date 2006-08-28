@@ -18,6 +18,8 @@
 #*/
 package Thread::Apartment::Common;
 
+use threads;
+use threads::shared;
 use Carp;
 use Exporter;
 use Storable qw(freeze thaw);
@@ -47,7 +49,7 @@ Exporter::export_tags(keys %EXPORT_TAGS);
 use strict;
 use warnings;
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 #/**
 # Marshall input parameters into a TQD-compatible format.
@@ -90,7 +92,7 @@ sub marshal {
 		next
 			unless $type;
 
-		$shared = threads::shared::_id($_);
+		$shared = threads::shared::is_shared($_);
 #
 #	if non-object ref, then
 #	if shared, use as is
@@ -149,6 +151,7 @@ sub marshal {
 #
 #	else if shared use as is, else freeze it
 #
+#	print "Marshalling a $type as ", ($shared ? 'shared' : 'private'), "\n";
 		push(@params, ($shared ? ($type, $_) : ('Storable', freeze($_))));
 	}
 	return \@params;
@@ -199,9 +202,11 @@ sub unmarshal {
 		next
 			if ($class eq 'Storable');
 
-		push(@results, bless $result->[$i++], $class),
+		my $obj = $result->[$i++];
+		push(@results, bless $obj, $class),
 		next
-			if threads::shared::_id($result->[$i]);
+			if ($class ne 'Thread::Apartment::Closure') &&
+				threads::shared::is_shared($obj);
 #
 #	SORRY NO CAN DO!!!
 #	At least, not until Perl gets its shit together...
@@ -230,16 +235,18 @@ sub unmarshal {
 # check for a closure:
 #	NOTE: this has multiple arguments after the class name
 #
-#		push(@results, ${class}->redeem($result->[$i++], $result->[$i++], $result->[$i++])),
-#		next
-#			if ($class eq 'Thread::Apartment::Closure');
+		push(@results, ${class}->redeem($obj, $result->[$i++], $result->[$i++])),
+#		print "Unmarhsalled a closure\n" and
+		next
+			if ($class eq 'Thread::Apartment::Closure');
 #
 # better be TQQ!!
 #	NOTE: we assume this must be successful, since we managed
 #	to load it in the first place
 #
+#		print "Unmarshalled a nonshared $class\n";
 		eval "require $class;";
-		push @results, ${class}->redeem($result->[$i++]);
+		push @results, ${class}->redeem($obj);
 	}
 
     return \@results;

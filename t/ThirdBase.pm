@@ -24,6 +24,7 @@ sub new {
 
 sub thirdBase {
 	my $obj = shift;
+#	print STDERR "Got to third base\n";
 	return ($obj->{_case} eq 'uc') ? 'THIRDBASE' : 'thirdbase';
 }
 

@@ -84,6 +84,7 @@ sub handle_method_requests {
 
 #print STDERR ref $self, " got request in thread $tid\n";
 
+#		print STDERR "Stopping...\n" and
 		return undef
 			if ($req->[1] eq 'STOP');
 #

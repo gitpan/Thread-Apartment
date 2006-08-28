@@ -45,6 +45,9 @@ sub remove_test_object { delete $_[0]->{_obj}; }
 sub run_simple_async {
 	my ($self, $testno, $testtype) = @_;
 
+#print STDERR "run simple async closure called with ", join(', ', @_),
+#	" on ", $self->{_obj}, "\n";
+
 	$self->{_ready} = undef;
 	my $obj = $self->{_obj};
 	my $id = $obj->ta_async_thirdBase(
@@ -54,6 +57,7 @@ sub run_simple_async {
 			my $res = shift;
 			report_result($testtype, $testno, defined($res) && ($res eq 'thirdbase'), 'async closure');
 		});
+	print STDERR "can't async: $@\n" unless defined($id);
 	return 1;
 }
 

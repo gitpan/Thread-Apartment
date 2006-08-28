@@ -1,5 +1,18 @@
 Changes for Thread::Apartment
 
+0.51	2006-Aug-25 D. Arnold
+
+	- fixed Thread::Apartment::Common to include threads/threads::shared
+	
+	- fixed Thread::Apartment::Common to use base reference for marshalled objects
+	
+	- changed to require threads 1.38, threads::shared 1.02
+	
+	- changed references to threads::shared::_id() to is_shared()
+	
+	- fixed Thread::Apartment::Client::join() to use direct reference to
+	TID value to locate server thread object
+
 0.50	2005-Nov-25 D. Arnold
 
 	- updated to support TQQ/TQD changes for default redeem

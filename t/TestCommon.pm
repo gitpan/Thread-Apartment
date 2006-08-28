@@ -31,7 +31,7 @@ package TestCommon;
 #
 use Thread::Queue::Duplex;
 use Thread::Apartment qw(start rendezvous
-	rendezvous_any rendezvous_until rendezvous_any_until);
+	rendezvous_any rendezvous_until rendezvous_any_until set_ta_debug);
 
 use strict;
 use warnings;
@@ -268,6 +268,8 @@ sub run {
 #
 #	async tests
 #
+#	$Thread::Queue::Duplex::tqd_debug = 1;
+#	set_ta_debug();
 	$batter->set_test_object($obj);
 	$batter->run_simple_async($testno, $testtype);
 	my $count = 0;

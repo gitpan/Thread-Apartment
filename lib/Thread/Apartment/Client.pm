@@ -12,6 +12,8 @@
 package Thread::Apartment::Client;
 
 use Carp;
+use threads;
+use threads::shared;
 use Thread::Queue::Queueable;
 use Thread::Queue::TQDContainer;
 use Thread::Apartment;
@@ -26,7 +28,7 @@ our $AUTOLOAD;
 use strict;
 use warnings;
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 use constant TAC_CLASS_LEN => 27;
 use constant TAC_REENT_LEN => 13;
@@ -247,6 +249,8 @@ sub AUTOLOAD {
 
 #print STDERR "calling getCase in $tid\n" if ($method eq 'getCase');
 
+#print STDERR "calling $method with ", join(', ', @params), "\n"
+#	if $async;
 	my $id = ($flag & TA_URGENT) ?
 		$tqd->enqueue_urgent(@params) :
 		$tqd->enqueue(@params);
@@ -254,6 +258,7 @@ sub AUTOLOAD {
 #	NOTE: we don't support ta_async_ w/ start()/rendezvous()
 #
 	$async_method = undef,
+#	print STDERR "Called async method $method\n" and
 	return $id
 		if $async;
 
@@ -345,11 +350,19 @@ sub set_timeout {
 # @return		1
 #*/
 sub join {
-#print STDERR "Joining...$_[0]->{_server_tid}\n";
-	my $thread = threads->object($_[0]->{_server_tid});
-	return 1 unless $thread;
+#
+#	Don't know why, but unless we use the scalar TID
+#	instead of deref'ing, object() just won't work ???
+#
+	my $tid = $_[0]->{_server_tid};
+
+#print STDERR "Joining $tid\n";
+	my $thread = threads->object($tid);
+#print STDERR "Thread $tid not found\n" and
+	return 1
+		unless $thread;
 	$thread->join();
-#print STDERR "Joined...$_[0]->{_server_tid}\n";
+#print STDERR "Joined...$tid\n";
 	return 1;
 }
 

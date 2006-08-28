@@ -57,6 +57,7 @@ use base('Exporter');
 	get_closure
 	get_reentrancy
 	set_reentrancy
+	set_ta_debug
 );
 
 #
@@ -68,7 +69,7 @@ use warnings;
 
 our %apt_pool : shared = ();	# thread pool (maps TIDs to TQDs)
 our @apt_tids : shared = ();	# TIDs of free threads
-our $ta_debug : shared = undef;	# global debug flag
+our $ta_debug : shared;	# global debug flag
 
 our %closure_map = ();			# map ids to closures
 our $next_closure_id = 0;		# closure ID generator
@@ -106,7 +107,7 @@ our %tacmap = ();
 #};
 
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 our $single_threaded;		# when set, we fallback to normal behavior
 #
@@ -234,6 +235,7 @@ sub _run {
 			return 1
 				if $installed;
 
+#			print STDERR "leaving apt\n" and
 			last unless $vacated;
 
 			next;
@@ -1872,6 +1874,10 @@ sub get_pending_request {
 			if ($id->[0] eq $_[0]);
 	}
 	return undef;
+}
+
+sub set_ta_debug {
+	$ta_debug = 1;
 }
 
 1;
